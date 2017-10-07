@@ -3,6 +3,10 @@
 const Sequelize = require('sequelize');
 const db = new Sequelize('postgres://localhost:5432/express_sequelize_enrichment');
 
+var Award = db.define('award', {
+  name: Sequelize.STRING,
+})
+
 var User = db.define('user', {
   name: {
     type: Sequelize.STRING,
@@ -16,10 +20,6 @@ var User = db.define('user', {
   getterMethods: {
     idk: function(){}
   }
-})
-
-var Award = db.define('award', {
-  name: Sequelize.STRING,
 })
 
 //class methods:
@@ -99,13 +99,12 @@ User.findPotentialMentors = function(){
 }
 
 //associations:
-User.hasOne(User, {as:'mentor'})  //adds mentorId to User
-Award.belongsTo(User, {as: 'award'}) //adds userId to award
-User.hasMany(Award);
+// User.hasOne(User, {as:'mentor'})  //adds mentorId to User
+// Award.belongsTo(User, {as: 'award'}) //adds userId to award
+// User.hasMany(Award);
 
 
-
-User.sync({force: false})
+db.sync({force: false})
 .then(function(data){
   console.log('database has been synced!')
 })
