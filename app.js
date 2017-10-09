@@ -1,6 +1,6 @@
 const Express = require ('express');
 const app = Express();
-// const router = Express.Router();
+const router = Express.Router();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const models = require('./models/database.js');
@@ -19,10 +19,10 @@ app.get('/', function(req, res, next) {
 
 app.use('/', routes);
 
-// app.use(function (err, req, res, next) {
-//   console.error(err.stack);
-//   res.status(err.status || 500).send(err.message || "Internal Error");
-// });
+app.use(function (err, req, res, next) {
+  console.error(err.stack);
+  res.status(err.status || 500).send(err.message || "Internal Error");
+});
 
 app.listen(PORT, function(){
   console.log('listening on port', PORT)

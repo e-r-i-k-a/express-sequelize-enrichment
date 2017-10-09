@@ -4,12 +4,6 @@ const User = models.User;
 const Award = models.Award
 const bluebird = require('bluebird')
 
-const redirect = (res)=> {
-  return ()=> {
-    res.redirect('/users');
-  };
-};
-
 //READ
 var allData = {};
 
@@ -33,7 +27,6 @@ router.get('/api', (function(req, res, next) {
 
 //CREATE
 router.post('/', (req, res, next)=> {
-  console.log(req.body)
   User.create(req.body)
     .then(function(createdUser) {
       res.json(createdUser);
@@ -43,29 +36,35 @@ router.post('/', (req, res, next)=> {
 
 //DELETE
 router.delete('/:id', (req, res, next)=> {
-  User.destroyById(req.params.id)
-    .then(redirect(res))
+  User.removeUser (Number(req.params.id))
+    .then(res.json('User has been removed!'))
     .catch( next);
 });
 
 //UPDATE
 router.put('/:id', (req, res, next)=> {
-  User.updateUserFromRequestBody(req.params.id, req.body)
-    .then(redirect(res))
+  User.updateUser (Number(req.params.id), req.body)
+    .then(function(updatedUser) {
+      res.json(updatedUser)
+    })
     .catch(next);
 });
 
 //CREATE AWARD
 router.post('/:id/awards', (req, res, next)=> {
-  User.generateAward(req.params.id)
-    .then(redirect(res))
+  User.addAward(Number(req.params.id))
+    .then(function(updatedUserWithAward) {
+      res.json(updatedUserWithAward)
+    })
     .catch(next);
 });
 
 //DELETE AWARD
 router.delete('/:userId/awards/:id', (req, res, next)=> {
   User.removeAward(req.params.userId, req.params.id)
-    .then(redirect(res))
+    .then(function(updatedUser){
+      res.json(updatedUser)
+    })
     .catch( next);
 });
 

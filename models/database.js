@@ -1,7 +1,7 @@
 'use strict';
 
 const Sequelize = require('sequelize');
-const db = new Sequelize('postgres://localhost:5432/express_sequelize_enrichment');
+const db = new Sequelize('postgres://localhost:5432/express_sequelize_enrichment', {logging: false});
 
 var Award = db.define('award', {
   name: Sequelize.STRING,
@@ -12,96 +12,90 @@ var User = db.define('user', {
     type: Sequelize.STRING,
     allowNull: false
   },
-  // mentor: {
-  //   type: Sequelize.STRING,
-  //   defaultValue: null
-  // }
 }, {
   getterMethods: {
     idk: function(){}
   }
 })
 
-//class methods:
-// User.addUser = function(input){
-//   User.create({
-//     where: {
-//       name: input.name
-//     }
-//   })
-//   .then(function(){})
-//   .catch(function(err){
-//     console.log(err);
-//   })
-// }
-
 User.removeUser = function(id){
-  return this.destroy()
-  .then(function(){})
-  .catch(function(err){
-    console.log(err)
-  })
-}
-
-User.addMentor = function(input){
-  this.update({
-    mentor: input.name,
-  })
-  .then(function(updated){
-    return updated;
+  return User.findById(id)
+  .then(function(userToRemove){
+    userToRemove.destroy({})
   })
   .catch(function(err){
     console.log(err)
   })
 }
 
-User.removeMentor = function(){
-  return this.destroy()
-  .then(function(){})
-  .catch(function(err){
-    console.log(err);
+User.updateUser = function(id, body) {
+  return User.findById(id)
+  .then(function(userToUpdate) {
+    return userToUpdate.update(body)
+  })
+  .catch(function(err) {
+    console.log(err)
   })
 }
 
-User.addAward = function(input){
-  Award.create({
-    where: {
-      name: input.name,
-      userId: this.id
-    }
+User.addAward = function(id){
+  return User.findById(id)
+  .then(function (userToAddAward){
+    return Award.create({
+      where: {
+        name: 'Sample Award'
+        // userId: userToAddAward.id
+      }
+    })
   })
-  .then(function(){})
+  .then(function(updatedUser){
+    return User.findById(id);
+  })
   .catch(function(err){
     console.log(err);
   })
 };
 
-User.removeAward = function(){
-  return this.destroy()
-  .then(function(){})
+User.removeAward = function(userId, awardId){
+  return Award.findById(awardId)
+  .then(function(awardToDelete) {
+    return awardToDelete.destroy()
+  })
+  .then(function(){
+    return User.findById(userId)
+  })
   .catch(function(err){
     console.log(err);
   })
 }
 
-User.findPotentialMentors = function(){
-  User.findAll({
-    where: {
-      UserId: {
-        [Op.ne]: this.id
-      }
-    }
+User.addMentor = function(userId, mentorId){
+  return User.findById(userId)
+  .then(function(userToAddMentor){
+    return userToAddMentor.update({
+        "mentorId": mentorId
+      })
   })
-  .then(function(){})
   .catch(function(err){
-    console.log(err);
+    console.log(err)
   })
 }
 
-//associations:
-// User.hasOne(User, {as:'mentor'})  //adds mentorId to User
-// Award.belongsTo(User, {as: 'award'}) //adds userId to award
-// User.hasMany(Award);
+User.removeMentor = function(userId, mentorId){
+  return User.findById(userId)
+  .then(function(userToDeleteMentor){
+    return userToDeleteMentor.update({
+        "mentorId": null
+      })
+  })
+  .catch(function(err){
+    console.log(err)
+  })
+}
+
+// associations:
+User.hasOne(User, {as:'mentor'})  //adds mentorId to User
+User.hasOne(Award)
 
 
 db.sync({force: false})
@@ -113,20 +107,3 @@ db.sync({force: false})
 });
 
 module.exports = {User, Award}
-
-//change mentor
-//generate award
-//remove award
-//check wikistack: e.g. findbytag, seed data
-// db.myClassMethod = function(userID){};
-
-//user can have a mentor
-//user can mentor several people
-//mentor can have several mentees
-//you can't be your own mentor
-
-//routes
-  // /:userId/awards/:id
-  // /
-//homepage
-//users
